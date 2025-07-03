@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="encrypt-container">
+    <div class="encrypt-panel glass-panel">
+        <div class="panel-header">
+            <i class="fas fa-shield-alt panel-icon"></i>
+            <h2>Encrypt Message</h2>
+            <p>Lock your secret behind unbreakable encryption</p>
+        </div>
+        
+        <form id="encryptForm" class="encrypt-form">
+            <div class="input-group">
+                <label for="message">Secret Message</label>
+                <textarea id="message" name="message" placeholder="Enter your secret message..." required></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Choose a strong password..." required>
+                <div class="password-strength" id="passwordStrength"></div>
+            </div>
+            
+            <button type="submit" class="encrypt-btn">
+                <i class="fas fa-lock"></i>
+                Generate Encrypted QR
+            </button>
+        </form>
+        
+        <div id="loadingSpinner" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Encrypting and generating QR code...</p>
+        </div>
+    </div>
+    
+    <div id="resultPanel" class="result-panel glass-panel hidden">
+        <div class="result-header">
+            <i class="fas fa-check-circle result-icon"></i>
+            <h3>QR Code Generated</h3>
+        </div>
+        
+        <div class="qr-display">
+            <img id="qrImage" src="" alt="Generated QR Code" class="qr-code">
+        </div>
+        
+        <div class="result-actions">
+            <button id="downloadBtn" class="action-btn primary">
+                <i class="fas fa-download"></i>
+                Download QR
+            </button>
+            <button id="copyDataBtn" class="action-btn secondary">
+                <i class="fas fa-copy"></i>
+                Copy Data
+            </button>
+            <button id="newEncryptBtn" class="action-btn">
+                <i class="fas fa-plus"></i>
+                New Message
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const message = document.getElementById('message').value;
+    const password = document.getElementById('password').value;
+    
+    // Show loading
+    document.getElementById('loadingSpinner').classList.remove('hidden');
+    
+    try {
+        const response = await fetch('/api/encrypt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Display QR code
+            document.getElementById('qrImage').src = data.qr_code;
+            document.getElementById('resultPanel').classList.remove('hidden');
+            
+            // Store encrypted data for copying
+            window.encryptedData = JSON.stringify(data.encrypted_data);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Network error: ' + error.message);
+    } finally {
+        document.getElementById('loadingSpinner').classList.add('hidden');
+    }
+});
+
+// Download QR code
+document.getElementById('downloadBtn').addEventListener('click', () => {
+    const qrImage = document.getElementById('qrImage');
+    const link = document.createElement('a');
+    link.download = 'encrypted-qr-code.png';
+    link.href = qrImage.src;
+    link.click();
+});
+
+// Copy encrypted data
+document.getElementById('copyDataBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(window.encryptedData);
+    showNotification('Encrypted data copied to clipboard!');
+});
+
+// New encryption
+document.getElementById('newEncryptBtn').addEventListener('click', () => {
+    document.getElementById('encryptForm').reset();
+    document.getElementById('resultPanel').classList.add('hidden');
+});
+</script>
+{% endblock %}

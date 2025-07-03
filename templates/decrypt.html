@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="decrypt-container">
+    <div class="decrypt-panel glass-panel">
+        <div class="panel-header">
+            <i class="fas fa-unlock-alt panel-icon"></i>
+            <h2>Decrypt QR Code</h2>
+            <p>Upload QR code or paste encrypted data</p>
+        </div>
+        
+        <div class="decrypt-methods">
+            <div class="method-tabs">
+                <button class="tab-btn active" data-method="upload">Upload QR</button>
+                <button class="tab-btn" data-method="paste">Paste Data</button>
+            </div>
+            
+            <!-- FILE UPLOAD METHOD -->
+            <div id="uploadMethod" class="method-content active">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <p>Click to select QR code image</p>
+                        <input type="file" id="qrFile" name="qr_file" accept="image/*" hidden>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="uploadPassword">Password</label>
+                        <input type="password" id="uploadPassword" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="decrypt-btn">
+                        <i class="fas fa-unlock"></i>
+                        Decrypt QR Code
+                    </button>
+                </form>
+            </div>
+            
+            <!-- PASTE DATA METHOD -->
+            <div id="pasteMethod" class="method-content">
+                <form id="pasteForm">
+                    <div class="input-group">
+                        <label for="encryptedData">Encrypted Data</label>
+                        <textarea id="encryptedData" rows="6" required></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="pastePassword">Password</label>
+                        <input type="password" id="pastePassword" required>
+                    </div>
+                    
+                    <button type="submit" class="decrypt-btn">
+                        <i class="fas fa-unlock"></i>
+                        Decrypt Data
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Decrypting...</p>
+        </div>
+    </div>
+    
+    <!-- RESULT PANEL -->
+    <div id="resultPanel" class="result-panel glass-panel hidden">
+        <div class="result-header">
+            <i class="fas fa-check-circle result-icon"></i>
+            <h3>Message Decrypted</h3>
+        </div>
+        
+        <div class="message-display">
+            <div id="decryptedMessage" class="message-content"></div>
+        </div>
+        
+        <div class="result-actions">
+            <button id="copyBtn" class="action-btn primary">
+                <i class="fas fa-copy"></i>
+                Copy Message
+            </button>
+            <button id="newBtn" class="action-btn">
+                <i class="fas fa-plus"></i>
+                Decrypt Another
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const method = btn.dataset.method;
+        
+        // Update tabs
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(method + 'Method').classList.add('active');
+    });
+});
+
+// File upload handling
+const uploadArea = document.getElementById('uploadArea');
+const qrFile = document.getElementById('qrFile');
+
+uploadArea.addEventListener('click', () => qrFile.click());
+
+qrFile.addEventListener('change', () => {
+    if (qrFile.files[0]) {
+        const file = qrFile.files[0];
+        uploadArea.innerHTML = `
+            <i class="fas fa-file-image upload-icon"></i>
+            <p><strong>Selected:</strong> ${file.name}</p>
+            <p><small>Size: ${(file.size/1024/1024).toFixed(2)} MB</small></p>
+        `;
+    }
+});
+
+// Upload form submission
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = qrFile.files[0];
+    const password = document.getElementById('uploadPassword').value;
+    
+    if (!file) {
+        alert('Please select a file');
+        return;
+    }
+    
+    if (!password) {
+        alert('Please enter password');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('qr_file', file);
+    formData.append('password', password);
+    
+    console.log('Uploading file:', file.name);
+    
+    await handleDecryption(formData);
+});
+
+// Paste form submission
+document.getElementById('pasteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const data = {
+        encrypted_data: document.getElementById('encryptedData').value,
+        password: document.getElementById('pastePassword').value
+    };
+    
+    await handleDecryption(data);
+});
+
+// Handle decryption
+async function handleDecryption(data) {
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('resultPanel');
+    
+    loading.classList.remove('hidden');
+    result.classList.add('hidden');
+    
+    try {
+        const isFormData = data instanceof FormData;
+        
+        const response = await fetch('/api/decrypt', {
+            method: 'POST',
+            body: isFormData ? data : JSON.stringify(data),
+            headers: isFormData ? {} : {'Content-Type': 'application/json'}
+        });
+        
+        const res = await response.json();
+        
+        if (res.success) {
+            document.getElementById('decryptedMessage').textContent = res.message;
+            result.classList.remove('hidden');
+            window.decryptedMessage = res.message;
+        } else {
+            alert('Error: ' + res.error);
+        }
+    } catch (error) {
+        alert('Network error: ' + error.message);
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+
+// Copy button
+document.getElementById('copyBtn').addEventListener('click', () => {
+    if (window.decryptedMessage) {
+        navigator.clipboard.writeText(window.decryptedMessage);
+        alert('Message copied!');
+    }
+});
+
+// New button
+document.getElementById('newBtn').addEventListener('click', () => {
+    document.querySelectorAll('form').forEach(form => form.reset());
+    document.getElementById('resultPanel').classList.add('hidden');
+    uploadArea.innerHTML = `
+        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+        <p>Click to select QR code image</p>
+    `;
+});
+</script>
+{% endblock %}
