@@ -1,33 +1,11 @@
 # 🔐 QR Code Locker
 
-## 📄 **README.md**
+🛡️ Military-Grade Encryption • 📱 QR Code Generation • 🎨 Cyberpunk Design • 🔒 Zero Data Storage
 
-```markdown
-
-
-# 🔐 QR Code Locker
-
-
-
-
-
-
-
-
-
-
-  🛡️ Military-Grade Encryption • 📱 QR Code Generation • 🎨 Cyberpunk Design • 🔒 Zero Data Storage
-
-
-
-
----
 
 ## 🌟 **Overview**
 
 **QR Code Locker** is a cutting-edge cyberpunk-inspired web application that transforms your sensitive messages into **encrypted QR codes**. Built with military-grade security and a stunning glassmorphism interface, it ensures your secrets remain protected without storing any data permanently.
-
-
 
 ### ✨ **Key Highlights**
 
@@ -38,14 +16,7 @@
 | Authenticated | Neon Effects | Session-Based | Responsive |
 
 
-
----
-
 ## 🚀 **Features**
-
-
-
-
 
 ### 🔒 **Security Features**
 - 🛡️ **AES-256-GCM Encryption** - Military-grade security
@@ -80,7 +51,7 @@ graph LR
     F --> G[✨ Message]
 ```
 
----
+
 
 ## 🛠️ **Tech Stack**
 
@@ -102,8 +73,6 @@ graph LR
 ![PIL](https://img.shields.io/badge/Pillow-45B7D1?style=for-the-badge&logo=image&logoColor=white)
 
 
-
----
 
 ## 📦 **Installation**
 
@@ -141,37 +110,22 @@ opencv-python==4.8.1.78
 numpy==1.24.3
 ```
 
----
-
-## 📖 **Usage Guide**
-
-
-
 ### 🔐 **Encryption Process**
-
-
 
 1. **📝 Enter Message**: Type your secret message
 2. **🔑 Set Password**: Choose a strong password (6+ characters)
 3. **⚡ Generate QR**: Click "Generate Encrypted QR"
 4. **💾 Download**: Save or share your encrypted QR code
 
-
-
 ### 🔓 **Decryption Process**
-
-
 
 1. **📤 Upload QR**: Drag & drop or select QR image
 2. **🔑 Enter Password**: Input the decryption password
 3. **🔓 Decrypt**: Click "Decrypt QR Code"
 4. **✨ View Message**: See your decrypted message
 
----
 
 ## 🔒 **Security Architecture**
-
-
 
 ### **Encryption Flow**
 
@@ -282,10 +236,10 @@ curl http://localhost:5000/api/test-qr
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
----
+
 
 ### **📧 Contact Information**
 - **GitHub**: [Abhishek Kumar](https://github.com/ocean-master0)
 - **Issues**: [GitHub Issues](https://github.com/ocean-master0/qr-code-locker/issues)
 
----
+
